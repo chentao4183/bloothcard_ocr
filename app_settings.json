@@ -1,0 +1,205 @@
+{
+  "ocr_fields": [
+    {
+      "field_id": "cbde03f3-ce07-4664-b424-1b054b43edfa",
+      "name": "卡ID",
+      "param_name": "RFID",
+      "enabled": true,
+      "default_value": "",
+      "recognition_area": null,
+      "sample_value": "",
+      "recognized_value": "",
+      "builtin": true
+    },
+    {
+      "field_id": "01699586-0215-4e33-ab4b-e5144eb5b46e",
+      "name": "诊疗时间",
+      "param_name": "Treatime",
+      "enabled": true,
+      "default_value": "",
+      "recognition_area": null,
+      "sample_value": "",
+      "recognized_value": "",
+      "builtin": true
+    },
+    {
+      "field_id": "fcbba9d3-d587-4ea9-96a0-661d417fe63c",
+      "name": "唯一ID",
+      "param_name": "Number1",
+      "enabled": true,
+      "default_value": "",
+      "recognition_area": {
+        "x": 1003,
+        "y": 456,
+        "width": 221,
+        "height": 47
+      },
+      "sample_value": "20240315012",
+      "recognized_value": "20240315012",
+      "builtin": false
+    },
+    {
+      "field_id": "34e3a437-85c2-4724-8e31-bf0c8dfae877",
+      "name": "流水号",
+      "param_name": "LSNumber2",
+      "enabled": true,
+      "default_value": "",
+      "recognition_area": {
+        "x": 791,
+        "y": 525,
+        "width": 212,
+        "height": 42
+      },
+      "sample_value": "139-5558-8888",
+      "recognized_value": "138-1234-5578",
+      "builtin": false
+    },
+    {
+      "field_id": "7d3ad02f-d327-4b85-a828-461e9f0c9ff3",
+      "name": "姓名",
+      "param_name": "DJName",
+      "enabled": true,
+      "default_value": "",
+      "recognition_area": {
+        "x": 793,
+        "y": 455,
+        "width": 209,
+        "height": 47
+      },
+      "sample_value": "李秀三",
+      "recognized_value": "",
+      "builtin": false
+    },
+    {
+      "field_id": "d00e0cc7-6801-43b5-a4af-0d72f96087e5",
+      "name": "年龄",
+      "param_name": "Age",
+      "enabled": true,
+      "default_value": "",
+      "recognition_area": {
+        "x": 1222,
+        "y": 458,
+        "width": 64,
+        "height": 43
+      },
+      "sample_value": "58",
+      "recognized_value": "45",
+      "builtin": false
+    },
+    {
+      "field_id": "775c6b96-2623-4680-b65c-563d443fd51e",
+      "name": "性别",
+      "param_name": "Sex",
+      "enabled": false,
+      "default_value": "",
+      "recognition_area": {
+        "x": 1328,
+        "y": 449,
+        "width": 112,
+        "height": 53
+      },
+      "sample_value": "Female",
+      "recognized_value": "Female",
+      "builtin": false
+    },
+    {
+      "field_id": "dd9eb6b9-8455-4321-b670-b7d45aad1e91",
+      "name": "医生",
+      "param_name": "docName",
+      "enabled": true,
+      "default_value": "",
+      "recognition_area": {
+        "x": 795,
+        "y": 696,
+        "width": 285,
+        "height": 41
+      },
+      "sample_value": "张主任",
+      "recognized_value": "",
+      "builtin": false
+    },
+    {
+      "field_id": "4ab831d7-5caa-4280-bfb2-335f3d2d2da9",
+      "name": "护士",
+      "param_name": "auxiliaryNurse",
+      "enabled": true,
+      "default_value": "",
+      "recognition_area": {
+        "x": 1082,
+        "y": 698,
+        "width": 289,
+        "height": 37
+      },
+      "sample_value": "刘护士",
+      "recognized_value": "陈护士",
+      "builtin": false
+    },
+    {
+      "field_id": "956d2214-b11b-485c-a3ac-e09a577b1ccd",
+      "name": "诊疗间",
+      "param_name": "examiningTable",
+      "enabled": true,
+      "default_value": "",
+      "recognition_area": {
+        "x": 1367,
+        "y": 694,
+        "width": 289,
+        "height": 42
+      },
+      "sample_value": "赵医师",
+      "recognized_value": "赵医师",
+      "builtin": false
+    },
+    {
+      "field_id": "7d968dbc-bc91-447c-ac2d-1df232cbf098",
+      "name": "阴阳性",
+      "param_name": "infectivity",
+      "enabled": true,
+      "default_value": "1",
+      "recognition_area": null,
+      "sample_value": "",
+      "recognized_value": "",
+      "builtin": false
+    }
+  ],
+  "service": {
+    "selected_version": "v0",
+    "versions": {
+      "v1": {
+        "verify_url": "http://192.168.23.11:62102/Interface/Verify",
+        "bind_url": "http://192.168.23.11:62102/Interface/Submit",
+        "debug_url": ""
+      },
+      "v2": {
+        "verify_url": "http://192.168.23.11/Interface/Verify",
+        "bind_url": "http://192.168.23.11/Interface/Submit",
+        "debug_url": ""
+      },
+      "v0": {
+        "verify_url": "",
+        "bind_url": "",
+        "debug_url": "http://10.10.5.116:62102/Interface/PersonnelBinding.aspx?"
+      }
+    },
+    "enable_verification": true,
+    "popup_success": true,
+    "popup_failure": true
+  },
+  "backend": {
+    "submission_mode": "auto",
+    "auto_delay_seconds": 5,
+    "enable_startup": false,
+    "enable_float_input": false,
+    "enable_service": true
+  },
+  "hid": {
+    "enabled": true,
+    "device_keywords": [
+      "BLE",
+      "RFID",
+      "Bluetooth Keyboard"
+    ],
+    "digit_length": 10,
+    "require_enter": false
+  }
+}
