@@ -1,0 +1,4 @@
+1. 用powershell 管理员进入 F:\trae\bloothcard\bloothcard ；
+2. 创建并激活虚拟环境：python -m venv .venv .\.venv\Scripts\activate  
+3. 安装环境依赖：pip install -r requirements.txt ， pip install -r requirements-build.txt
+4. 编译成exe文件：powershell -ExecutionPolicy Bypass -File .\scripts\build_exe.ps1
