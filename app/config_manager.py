@@ -97,8 +97,8 @@ class ServiceConfig:
                 debug_url="",
             ),
             "v2": ServiceVersionConfig(
-                verify_url="http://192.168.23.11/Interface/Verify",
-                bind_url="http://192.168.23.11/Interface/Submit",
+                verify_url="http://10.10.5.116:62102/api/diagnosis/lk-application/getSingleApplicationDetail/",
+                bind_url="http://192.168.23.11:62102/diagnosis/lk-application/bindSingleDiagnosis",
                 debug_url="",
             ),
         }
@@ -168,10 +168,11 @@ class BackendConfig:
 
 @dataclass
 class HidConfig:
+    """HID监听配置"""
     enabled: bool = True
-    device_keywords: List[str] = field(default_factory=lambda: ["BLE", "RFID"])
+    device_keywords: List[str] = field(default_factory=lambda: ["Bluetooth", "Keyboard"])
     digit_length: int = 10
-    require_enter: bool = True
+    require_enter: bool = False
 
     @classmethod
     def from_dict(cls, data: Dict) -> "HidConfig":

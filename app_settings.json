@@ -35,7 +35,7 @@
         "height": 47
       },
       "sample_value": "20240315012",
-      "recognized_value": "20240315012",
+      "recognized_value": "",
       "builtin": false
     },
     {
@@ -51,7 +51,7 @@
         "height": 42
       },
       "sample_value": "139-5558-8888",
-      "recognized_value": "138-1234-5578",
+      "recognized_value": "BF47BEIB82BECFBSDROROOIC |",
       "builtin": false
     },
     {
@@ -83,7 +83,7 @@
         "height": 43
       },
       "sample_value": "58",
-      "recognized_value": "45",
+      "recognized_value": "",
       "builtin": false
     },
     {
@@ -131,7 +131,7 @@
         "height": 37
       },
       "sample_value": "刘护士",
-      "recognized_value": "陈护士",
+      "recognized_value": "",
       "builtin": false
     },
     {
@@ -147,7 +147,7 @@
         "height": 42
       },
       "sample_value": "赵医师",
-      "recognized_value": "赵医师",
+      "recognized_value": "",
       "builtin": false
     },
     {
@@ -166,13 +166,13 @@
     "selected_version": "v0",
     "versions": {
       "v1": {
-        "verify_url": "http://192.168.23.11:62102/Interface/Verify",
+        "verify_url": "http://10.10.5.116:62102/api/diagnosis/lk-application/getSingleApplicationDetail/",
         "bind_url": "http://192.168.23.11:62102/Interface/Submit",
         "debug_url": ""
       },
       "v2": {
-        "verify_url": "http://192.168.23.11/Interface/Verify",
-        "bind_url": "http://192.168.23.11/Interface/Submit",
+        "verify_url": "http://10.10.5.116:62102/api/diagnosis/lk-application/getSingleApplicationDetail/",
+        "bind_url": "http://192.168.23.11:62102/diagnosis/lk-application/bindSingleDiagnosis",
         "debug_url": ""
       },
       "v0": {

@@ -416,23 +416,24 @@ class App:
 
             verify_var = tk.StringVar(value=self.config.service.versions[version].verify_url)
             bind_var = tk.StringVar(value=self.config.service.versions[version].bind_url)
-            verify_var.trace_add("write", lambda *_a, v=version, var=verify_var: self._update_service_url(v, "verify", var))
-            bind_var.trace_add("write", lambda *_a, v=version, var=bind_var: self._update_service_url(v, "bind", var))
 
             # V0.0版本特殊处理：显示调试URL和调试按钮
             if version == "v0":
                 debug_var = tk.StringVar(value=self.config.service.versions[version].debug_url)
-                debug_var.trace_add("write", lambda *_a, v=version, var=debug_var: self._update_service_url(v, "debug", var))
                 
                 ttk.Label(block, text="调试URL:").grid(row=0, column=1, sticky="w", padx=6, pady=2)
-                ttk.Entry(block, textvariable=debug_var, width=60).grid(row=0, column=2, sticky="ew", padx=6, pady=2)
-                ttk.Button(block, text="调试", command=self._debug_v0_system).grid(row=0, column=3, sticky="e", padx=6, pady=2)
+                ttk.Entry(block, textvariable=debug_var, width=50).grid(row=0, column=2, sticky="ew", padx=6, pady=2)
+                ttk.Button(block, text="保存", command=lambda v=version, var=debug_var: self._update_service_url(v, "debug", var)).grid(row=0, column=3, sticky="e", padx=2, pady=2)
+                ttk.Button(block, text="调试", command=self._debug_v0_system).grid(row=0, column=4, sticky="e", padx=6, pady=2)
                 block.columnconfigure(2, weight=1)
             else:
                 ttk.Label(block, text="洗消验证接口:").grid(row=0, column=1, sticky="w", padx=6, pady=2)
-                ttk.Entry(block, textvariable=verify_var, width=70).grid(row=0, column=2, sticky="ew", padx=6, pady=2)
+                ttk.Entry(block, textvariable=verify_var, width=60).grid(row=0, column=2, sticky="ew", padx=6, pady=2)
+                ttk.Button(block, text="保存", command=lambda v=version, var=verify_var: self._update_service_url(v, "verify", var)).grid(row=0, column=3, sticky="e", padx=6, pady=2)
+                
                 ttk.Label(block, text="信息绑定接口:").grid(row=1, column=1, sticky="w", padx=6, pady=2)
-                ttk.Entry(block, textvariable=bind_var, width=70).grid(row=1, column=2, sticky="ew", padx=6, pady=2)
+                ttk.Entry(block, textvariable=bind_var, width=60).grid(row=1, column=2, sticky="ew", padx=6, pady=2)
+                ttk.Button(block, text="保存", command=lambda v=version, var=bind_var: self._update_service_url(v, "bind", var)).grid(row=1, column=3, sticky="e", padx=6, pady=2)
                 block.columnconfigure(2, weight=1)
 
         verify_frame = ttk.LabelFrame(self.tab_service, text="2. 验证功能选择")
