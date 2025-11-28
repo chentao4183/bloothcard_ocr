@@ -31,6 +31,7 @@ try:
     from app.ble.ble_manager import BleManager  # type: ignore
     from app.config_manager import AppConfig, ConfigManager, OCRField, Rect, ServiceVersionConfig
     from app.hid_listener_simple import SimpleHidListener as HidListener  # type: ignore
+    
     from app.system_devices import ConnectedDevice  # type: ignore
     logger.debug("成功导入所有模块")
 except Exception as e:
@@ -40,6 +41,7 @@ except Exception as e:
         from .ble.ble_manager import BleManager  # type: ignore
         from .config_manager import AppConfig, ConfigManager, OCRField, Rect, ServiceVersionConfig  # type: ignore
         from .hid_listener_simple import SimpleHidListener as HidListener  # type: ignore
+        
         from .system_devices import ConnectedDevice  # type: ignore
         logger.debug("成功相对导入所有模块")
     except Exception as e:
@@ -257,7 +259,8 @@ class App:
         self.binding_dialog: Optional[BindingDialog] = None
         self.float_window: Optional[FloatInputWindow] = None
         self.hid_listener: Optional[HidListener] = None
-        self.hid_accepting: bool = False
+
+        self.hid_accepting: bool = True
         self.bound_hid_device: Optional[str] = None
         self.hid_expected_label: str = ""
 
@@ -270,6 +273,9 @@ class App:
         self._refresh_backend_form()
         if self.config.backend.enable_float_input:
             self._ensure_float_window(show=True)
+        
+        # 应用程序初始化完成后自动启动HID监听器
+        self._restart_hid_listener()
 
     def _run_loop(self) -> None:
         asyncio.set_event_loop(self.loop)
@@ -311,7 +317,7 @@ class App:
         scroll_x.grid(row=1, column=0, sticky="ew")
         self.log_text.configure(yscrollcommand=scroll_y.set, xscrollcommand=scroll_x.set)
 
-        self._restart_hid_listener()
+
 
     # --- BLE TAB
     def _build_ble_tab(self) -> None:
@@ -1107,7 +1113,7 @@ class App:
         self.config.hid.digit_length = digits
         self.config.hid.require_enter = self.hid_require_enter_var.get()
         self._save_config()
-        self._restart_hid_listener()
+
         self.append_log("HID 配置已更新。")
 
     # --- BLE actions
@@ -1193,15 +1199,13 @@ class App:
         display_name = f"{device.name} | {device.address}"
         status = "已连接" if device.is_connected else ("已配对" if device.is_paired else "未连接")
         self.status_var.set(f"已选择：{display_name}（{status}）")
-        self._enable_hid_capture(display_name)
-        self.append_log(f"已选择设备：{display_name}，开始监听 HID 输入。")
+        self.append_log(f"已选择设备：{display_name}，开始通过BLE接收数据。")
         self.root.after(0, lambda: self.disconnect_button.configure(state=tk.NORMAL))
 
     def on_disconnect(self) -> None:
-        self._disable_hid_capture()
         self.current_device = None
         self.status_var.set("已断开")
-        self.append_log("已停止 HID 监听。")
+        self.append_log("已断开与蓝牙设备的连接。")
         self.connect_button.configure(state=tk.NORMAL)
         self.disconnect_button.configure(state=tk.DISABLED)
 
@@ -1433,27 +1437,194 @@ class App:
                 messagebox.showerror("错误", error_msg)
 
     def _start_workflow(self, card: Dict[str, str]) -> None:
-        field_values = self._collect_field_values()
-        missing = [f.name for f in self.config.ocr_fields if f.enabled and not (f.recognized_value or f.default_value)]
-        if missing:
-            messagebox.showwarning("字段缺失", f"以下字段缺失，已使用空值：{', '.join(missing)}")
-        payload = {
-            "card_hex": card.get("hex"),
-            "card_dec": card.get("dec"),
-            "timestamp": _human_now(),
-            "fields": field_values,
-        }
-        if self.config.service.enable_verification:
-            self.append_log("开始调用洗消验证接口...")
-            self._post_request(
-                self.config.service.get_selected_version().verify_url,
-                payload,
-                on_success=lambda data: self._after_verify(True, data, payload),
-                on_error=lambda err: self._after_verify(False, err, payload),
-            )
+        # V2版本特殊处理：先不执行OCR，直接将10D卡号拼接到URL后面发送GET请求
+        if self.config.service.selected_version == "v2":
+            self.append_log("[V2版本] 开始处理，先不执行OCR识别...")
+            
+            # 直接使用10D卡号，不执行OCR
+            card_dec = card.get("dec")
+            
+            if self.config.service.enable_verification:
+                self.append_log("[V2版本] 调用洗消验证接口...")
+                selected_version = self.config.service.get_selected_version()
+                
+                # 构建简化的payload，只包含必要信息
+                payload = {
+                    "card_hex": card.get("hex"),
+                    "card_dec": card_dec,
+                    "timestamp": _human_now(),
+                    "fields": {},  # 先不包含OCR字段
+                }
+                
+                # V2版本使用GET请求
+                self._get_request(
+                    selected_version.verify_url,
+                    payload,
+                    on_success=lambda data: self._after_v2_verify(True, data, card),
+                    on_error=lambda err: self._after_v2_verify(False, err, card),
+                )
+            else:
+                # 如果未启用验证，直接执行OCR
+                self.append_log("[V2版本] 未启用验证，直接执行OCR识别...")
+                self._perform_ocr_and_continue(card)
         else:
-            self._open_binding_dialog(payload)
+            # 其他版本保持原有逻辑
+            field_values = self._collect_field_values()
+            missing = [f.name for f in self.config.ocr_fields if f.enabled and not (f.recognized_value or f.default_value)]
+            if missing:
+                messagebox.showwarning("字段缺失", f"以下字段缺失，已使用空值：{', '.join(missing)}")
+            payload = {
+                "card_hex": card.get("hex"),
+                "card_dec": card.get("dec"),
+                "timestamp": _human_now(),
+                "fields": field_values,
+            }
+            if self.config.service.enable_verification:
+                self.append_log("开始调用洗消验证接口...")
+                selected_version = self.config.service.get_selected_version()
+                # 其他版本使用POST请求
+                self._post_request(
+                    selected_version.verify_url,
+                    payload,
+                    on_success=lambda data: self._after_verify(True, data, payload),
+                    on_error=lambda err: self._after_verify(False, err, payload),
+                )
+            else:
+                self._open_binding_dialog(payload)
 
+    def _after_v2_verify(self, ok: bool, response: Dict, card: Dict[str, str]) -> None:
+        """V2版本验证后的处理"""
+        # 记录完整响应内容以便调试
+        self.append_log(f"[V2版本] 洗消验证响应内容: {response}")
+        
+        if ok:
+            # 确保response是字典类型
+            if isinstance(response, dict):
+                # 获取状态码
+                code = response.get("code")
+                self.append_log(f"[V2版本] 洗消验证接口返回状态码: {code}")
+                
+                if code == 200:
+                    self.append_log(f"[V2版本] 洗消验证接口返回成功 (code=200)")
+                    
+                    # 检查返回内容的 "data.status.first" 是否等于 "可用"
+                    data = response.get("data", {})
+                    if data and isinstance(data, dict):
+                        status = data.get("status", {})
+                        if status and isinstance(status, dict):
+                            first_status = status.get("first")
+                            if first_status == "可用":
+                                self.append_log("[V2版本] 验证状态：可用，开始执行OCR识别...")
+                                
+                                # 验证合格后执行OCR识别
+                                self._perform_ocr_and_continue(card)
+                                return
+                        
+                    # 如果没有 "data.status.first" 或不等于 "可用"，检查是否有 "msg" 字段
+                    if "msg" in response:
+                        msg = response.get("msg", "验证失败")
+                        self.append_log(f"[V2版本] 验证失败：{msg}")
+                        if self.config.service.popup_failure:
+                            messagebox.showerror("洗消验证", f"验证失败：{msg}")
+                    else:
+                        # 其他情况
+                        self.append_log("[V2版本] 验证失败：返回内容格式不符合要求")
+                        if self.config.service.popup_failure:
+                            messagebox.showerror("洗消验证", "验证失败：返回内容格式不符合要求")
+                else:
+                    # 响应状态码不是200，检查是否有 "msg" 字段
+                    if "msg" in response:
+                        msg = response.get("msg", "验证失败")
+                        self.append_log(f"[V2版本] 验证失败：{msg}")
+                        if self.config.service.popup_failure:
+                            messagebox.showerror("洗消验证", f"验证失败：{msg}")
+                    else:
+                        # 其他情况
+                        text = response.get("message", "验证失败")
+                        self.append_log(f"[V2版本] 验证失败: {text}")
+                        if self.config.service.popup_failure:
+                            messagebox.showerror("洗消验证", f"验证失败：{text}")
+            else:
+                # response不是字典类型
+                text = str(response)
+                self.append_log(f"[V2版本] 验证失败: {text}")
+                if self.config.service.popup_failure:
+                    messagebox.showerror("洗消验证", f"验证失败：{text}")
+        else:
+            # 请求失败的情况
+            if isinstance(response, dict):
+                # 检查是否有 "error" 或 "msg" 字段
+                if "error" in response:
+                    msg = response.get("error", "验证失败")
+                elif "msg" in response:
+                    msg = response.get("msg", "验证失败")
+                else:
+                    msg = "验证失败"
+            else:
+                msg = str(response)
+                
+            self.append_log(f"[V2版本] 洗消验证失败: {msg}")
+            if self.config.service.popup_failure:
+                messagebox.showerror("洗消验证", f"验证失败：{msg}")
+    
+    def _perform_ocr_and_continue(self, card: Dict[str, str]) -> None:
+        """执行OCR识别并继续后续流程"""
+        try:
+            # 执行OCR识别所有字段
+            for field in self.config.ocr_fields:
+                if field.enabled and field.recognition_area:
+                    x = field.recognition_area.x
+                    y = field.recognition_area.y
+                    w = field.recognition_area.width
+                    h = field.recognition_area.height
+                    
+                    self.append_log(f"[OCR] 开始识别字段：{field.name}，区域：({x},{y},{w},{h})")
+                    
+                    # 进行OCR文字识别，带重试机制
+                    recognized_text = self._recognize_with_retry(x, y, w, h, max_retries=2)
+                    
+                    if recognized_text:
+                        # 特殊处理：年龄字段只保留数字
+                        if field.name == "年龄":
+                            import re
+                            # 提取所有数字，去掉汉字如"岁"、"月"等
+                            numbers = re.findall(r'\d+', recognized_text)
+                            if numbers:
+                                cleaned_text = ''.join(numbers)
+                                self.append_log(f"[OCR] 年龄字段清理：'{recognized_text}' → '{cleaned_text}'")
+                                recognized_text = cleaned_text
+                        
+                        field.recognized_value = recognized_text
+                        self.append_log(f"[OCR] 识别成功：{field.name} = {recognized_text}")
+                    else:
+                        self.append_log(f"[OCR] 未识别到文字：{field.name}")
+            
+            # 保存OCR结果
+            self._save_config()
+            self._refresh_ocr_tree()
+            
+            # 收集OCR识别结果
+            field_values = self._collect_field_values()
+            missing = [f.name for f in self.config.ocr_fields if f.enabled and not (f.recognized_value or f.default_value)]
+            if missing:
+                self.append_log(f"[V2版本] 以下字段缺失，已使用空值：{', '.join(missing)}")
+            
+            # 构建完整payload
+            payload = {
+                "card_hex": card.get("hex"),
+                "card_dec": card.get("dec"),
+                "timestamp": _human_now(),
+                "fields": field_values,
+            }
+            
+            # 继续后续流程
+            self.append_log("[V2版本] OCR识别完成，打开绑定对话框...")
+            self._open_binding_dialog(payload)
+            
+        except Exception as e:
+            self.append_log(f"[V2版本] OCR识别过程中出错: {e}")
+            messagebox.showerror("OCR识别错误", f"OCR识别过程中发生错误：{e}")
+    
     def _after_verify(self, ok: bool, response: Dict, payload: Dict) -> None:
         if ok:
             text = response.get("message") if isinstance(response, dict) else str(response)
@@ -1544,6 +1715,95 @@ class App:
 
         future.add_done_callback(_callback)
 
+    def _get_request(self, url: str, payload: Dict, on_success, on_error) -> None:
+        if not url:
+            on_error({"error": "未配置接口地址"})
+            return
+
+        def _request():
+            try:
+                # 构建GET请求URL
+                import urllib.parse
+                
+                # V2版本特殊处理：将10位数卡号删除前面4个0，保留后6位，然后拼接到URL后面
+                if self.config.service.selected_version == "v2":
+                    card_dec = payload.get("card_dec", "")
+                    
+                    # 处理卡号：删除前面4个0，保留后6位
+                    if len(card_dec) == 10 and card_dec.startswith("0000"):
+                        processed_card = card_dec[4:]
+                        self.append_log(f"[V2] 卡号处理：{card_dec} → {processed_card}")
+                    else:
+                        # 如果不是10位或不以前4个0开头，使用原始卡号
+                        processed_card = card_dec
+                        self.append_log(f"[V2] 卡号未处理：{processed_card}")
+                    
+                    # 确保URL和卡号之间没有多余的分隔符
+                    if url.endswith("/"):
+                        full_url = f"{url}{processed_card}"
+                    else:
+                        full_url = f"{url}{processed_card}"
+                    
+                    self.append_log(f"[V2] 发送GET请求: {full_url}")
+                    
+                    resp = requests.get(full_url, timeout=10)
+                    resp.raise_for_status()
+                    
+                    self.append_log(f"[V2] 响应状态码: {resp.status_code}")
+                    self.append_log(f"[V2] 响应内容: {resp.text}")
+                    
+                    try:
+                        return True, resp.json()
+                    except json.JSONDecodeError:
+                        return True, {"message": resp.text}
+                else:
+                    # 其他版本使用标准GET参数
+                    params = {}
+                    
+                    # 提取需要的参数
+                    if payload.get("card_hex"):
+                        params["card_hex"] = payload["card_hex"]
+                    if payload.get("card_dec"):
+                        params["card_dec"] = payload["card_dec"]
+                    
+                    # 添加fields中的参数
+                    for field_name, field_value in payload.get("fields", {}).items():
+                        params[field_name] = field_value
+                    
+                    # 构建完整URL
+                    if "?" in url:
+                        if url.endswith("?"):
+                            full_url = url + urllib.parse.urlencode(params)
+                        else:
+                            full_url = url + "&" + urllib.parse.urlencode(params)
+                    else:
+                        full_url = url + "?" + urllib.parse.urlencode(params)
+                    
+                    self.append_log(f"[GET] 发送请求: {full_url}")
+                    
+                    resp = requests.get(full_url, timeout=10)
+                    resp.raise_for_status()
+                    
+                    self.append_log(f"[GET] 响应状态码: {resp.status_code}")
+                    self.append_log(f"[GET] 响应内容: {resp.text}")
+                    
+                    try:
+                        return True, resp.json()
+                    except json.JSONDecodeError:
+                        return True, {"message": resp.text}
+            except Exception as exc:
+                error_msg = str(exc)
+                self.append_log(f"[V2] 请求失败: {error_msg}")
+                return False, {"error": error_msg}
+
+        future = self.executor.submit(_request)
+
+        def _callback(fut):
+            ok, result = fut.result()
+            self.root.after(0, lambda: (on_success(result) if ok else on_error(result)))
+
+        future.add_done_callback(_callback)
+
     # --- other helpers
     def _save_config(self) -> None:
         self.config_manager.save(self.config)
@@ -1578,33 +1838,32 @@ class App:
         self.on_card_data(card)
 
     def _restart_hid_listener(self) -> None:
-        """重启HID监听器 - 只在有蓝牙设备连接时启动"""
+        """重启HID监听器 - 在HID功能启用时启动，无需BLE设备连接"""
         self.append_log(f"[调试] 开始重启HID监听器")
         
         if os.name != "nt":
             self.append_log("[调试] 非Windows系统，不支持HID监听")
             return
         
-        self._stop_hid_listener()
+        # 停止之前的监听器
+        if self.hid_listener:
+            self.append_log("[调试] 停止之前的HID监听器")
+            self.hid_listener.stop()
+            self.hid_listener = None
+            self.bound_hid_device = None
         
-        # 只有当HID功能启用且有蓝牙设备连接时才启动监听器
+        # 只有当HID功能启用时才启动监听器
         self.append_log(f"[调试] HID配置状态: enabled={self.config.hid.enabled}")
         if not self.config.hid.enabled:
             self.append_log("HID监听：功能未启用，不启动监听器")
             return
             
-        self.append_log(f"[调试] current_device存在: {hasattr(self, 'current_device') and self.current_device}")
-        if not hasattr(self, 'current_device') or not self.current_device:
-            self.append_log("HID监听：没有连接的蓝牙设备，不启动监听器")
-            return
-            
-        device_name = self.current_device.name
-        self.append_log(f"[调试] 准备为设备 {device_name} 启动HID监听器")
         self.append_log(f"[调试] HID配置参数: digit_length={self.config.hid.digit_length}, require_enter={self.config.hid.require_enter}")
+        self.append_log(f"[调试] 设备关键字: {self.config.hid.device_keywords}")
         
         try:
             self.hid_listener = HidListener(
-                device_keywords=['Bluetooth', 'Keyboard'],
+                device_keywords=self.config.hid.device_keywords,
                 digit_length=self.config.hid.digit_length,
                 require_enter=self.config.hid.require_enter,
                 callback=self._on_hid_card,
@@ -1613,7 +1872,7 @@ class App:
             self.append_log(f"[调试] HID监听器实例创建成功")
             start_result = self.hid_listener.start()
             self.append_log(f"[调试] HID监听器start()调用结果: {start_result}")
-            self.append_log(f"HID监听：为设备 {device_name} 启动蓝牙数据监听器")
+            self.append_log("HID监听：已启动蓝牙数据监听器，等待HID设备输入")
         except Exception as e:
             self.append_log(f"[错误] 启动HID监听器失败: {e}")
             import traceback

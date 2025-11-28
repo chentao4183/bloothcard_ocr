@@ -35,7 +35,7 @@
         "height": 47
       },
       "sample_value": "20240315012",
-      "recognized_value": "",
+      "recognized_value": "屎存",
       "builtin": false
     },
     {
@@ -51,7 +51,7 @@
         "height": 42
       },
       "sample_value": "139-5558-8888",
-      "recognized_value": "BF47BEIB82BECFBSDROROOIC |",
+      "recognized_value": "",
       "builtin": false
     },
     {
@@ -67,7 +67,7 @@
         "height": 47
       },
       "sample_value": "李秀三",
-      "recognized_value": "",
+      "recognized_value": "7BEI882BECFBSDROROOTC",
       "builtin": false
     },
     {
@@ -147,7 +147,7 @@
         "height": 42
       },
       "sample_value": "赵医师",
-      "recognized_value": "",
+      "recognized_value": "的逻辑处理卡片数据。确保只有验",
       "builtin": false
     },
     {
@@ -163,7 +163,7 @@
     }
   ],
   "service": {
-    "selected_version": "v0",
+    "selected_version": "v2",
     "versions": {
       "v1": {
         "verify_url": "http://10.10.5.116:62102/api/diagnosis/lk-application/getSingleApplicationDetail/",
@@ -172,7 +172,7 @@
       },
       "v2": {
         "verify_url": "http://10.10.5.116:62102/api/diagnosis/lk-application/getSingleApplicationDetail/",
-        "bind_url": "http://192.168.23.11:62102/diagnosis/lk-application/bindSingleDiagnosis",
+        "bind_url": "https://192.168.23.11:62102/diagnosis/lk-application/bindSingleDiagnosis",
         "debug_url": ""
       },
       "v0": {
