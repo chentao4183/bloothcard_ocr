@@ -1,0 +1,205 @@
+{
+  "ocr_fields": [
+    {
+      "field_id": "cbde03f3-ce07-4664-b424-1b054b43edfa",
+      "name": "卡ID",
+      "param_name": "endoscopeId",
+      "enabled": false,
+      "default_value": "",
+      "recognition_area": null,
+      "sample_value": "",
+      "recognized_value": "",
+      "builtin": true
+    },
+    {
+      "field_id": "01699586-0215-4e33-ab4b-e5144eb5b46e",
+      "name": "任务iD",
+      "param_name": "taskId",
+      "enabled": false,
+      "default_value": "",
+      "recognition_area": null,
+      "sample_value": "",
+      "recognized_value": "",
+      "builtin": true
+    },
+    {
+      "field_id": "fcbba9d3-d587-4ea9-96a0-661d417fe63c",
+      "name": "唯一ID",
+      "param_name": "patientNum",
+      "enabled": true,
+      "default_value": "",
+      "recognition_area": {
+        "x": 313,
+        "y": 305,
+        "width": 129,
+        "height": 36
+      },
+      "sample_value": "100000000045",
+      "recognized_value": "100000000045",
+      "builtin": false
+    },
+    {
+      "field_id": "34e3a437-85c2-4724-8e31-bf0c8dfae877",
+      "name": "流水号",
+      "param_name": "diagnosisNum",
+      "enabled": true,
+      "default_value": "",
+      "recognition_area": {
+        "x": 318,
+        "y": 346,
+        "width": 101,
+        "height": 35
+      },
+      "sample_value": "200000154",
+      "recognized_value": "200000154",
+      "builtin": false
+    },
+    {
+      "field_id": "7d3ad02f-d327-4b85-a828-461e9f0c9ff3",
+      "name": "姓名",
+      "param_name": "name",
+      "enabled": true,
+      "default_value": "",
+      "recognition_area": {
+        "x": 300,
+        "y": 381,
+        "width": 76,
+        "height": 47
+      },
+      "sample_value": "病人姓名",
+      "recognized_value": "病人666",
+      "builtin": false
+    },
+    {
+      "field_id": "d00e0cc7-6801-43b5-a4af-0d72f96087e5",
+      "name": "年龄",
+      "param_name": "age",
+      "enabled": true,
+      "default_value": "",
+      "recognition_area": {
+        "x": 444,
+        "y": 379,
+        "width": 49,
+        "height": 49
+      },
+      "sample_value": "22",
+      "recognized_value": "22",
+      "builtin": false
+    },
+    {
+      "field_id": "775c6b96-2623-4680-b65c-563d443fd51e",
+      "name": "性别",
+      "param_name": "sex",
+      "enabled": true,
+      "default_value": "",
+      "recognition_area": {
+        "x": 300,
+        "y": 425,
+        "width": 37,
+        "height": 38
+      },
+      "sample_value": "女",
+      "recognized_value": "男",
+      "builtin": false
+    },
+    {
+      "field_id": "dd9eb6b9-8455-4321-b670-b7d45aad1e91",
+      "name": "医生",
+      "param_name": "diagnosisDoctor",
+      "enabled": true,
+      "default_value": "",
+      "recognition_area": {
+        "x": 333,
+        "y": 554,
+        "width": 236,
+        "height": 61
+      },
+      "sample_value": "诊疗医生姓名",
+      "recognized_value": "诊疗医生姓名",
+      "builtin": false
+    },
+    {
+      "field_id": "4ab831d7-5caa-4280-bfb2-335f3d2d2da9",
+      "name": "护士",
+      "param_name": "auxiliaryNurse",
+      "enabled": true,
+      "default_value": "",
+      "recognition_area": {
+        "x": 331,
+        "y": 616,
+        "width": 241,
+        "height": 54
+      },
+      "sample_value": "辅助护士",
+      "recognized_value": "辅助护士",
+      "builtin": false
+    },
+    {
+      "field_id": "956d2214-b11b-485c-a3ac-e09a577b1ccd",
+      "name": "诊疗间",
+      "param_name": "diagnosisRoom",
+      "enabled": true,
+      "default_value": "",
+      "recognition_area": {
+        "x": 330,
+        "y": 670,
+        "width": 244,
+        "height": 60
+      },
+      "sample_value": "检查台7",
+      "recognized_value": "检查台7",
+      "builtin": false
+    },
+    {
+      "field_id": "7d968dbc-bc91-447c-ac2d-1df232cbf098",
+      "name": "阴阳性",
+      "param_name": "infectivity",
+      "enabled": true,
+      "default_value": "1",
+      "recognition_area": null,
+      "sample_value": "",
+      "recognized_value": "",
+      "builtin": false
+    }
+  ],
+  "service": {
+    "selected_version": "v1",
+    "versions": {
+      "v1": {
+        "verify_url": "http://10.10.5.116:62102/api/diagnosis/lk-application/getSingleApplicationDetail/",
+        "bind_url": "http://192.168.23.11:62102/Interface/Submit",
+        "debug_url": ""
+      },
+      "v2": {
+        "verify_url": "http://10.10.5.116:62102/api/diagnosis/lk-application/getSingleApplicationDetail/",
+        "bind_url": "http://10.10.5.116:62102/api/diagnosis/lk-application/bindSingleDiagnosis",
+        "debug_url": ""
+      },
+      "v0": {
+        "verify_url": "",
+        "bind_url": "",
+        "debug_url": "http://10.10.5.116:62102/Interface/PersonnelBinding.aspx?"
+      }
+    },
+    "enable_verification": true,
+    "popup_success": true,
+    "popup_failure": true
+  },
+  "backend": {
+    "submission_mode": "manual",
+    "auto_delay_seconds": 5,
+    "enable_startup": false,
+    "enable_float_input": false,
+    "enable_service": true
+  },
+  "hid": {
+    "enabled": true,
+    "device_keywords": [
+      "BLE",
+      "RFID",
+      "Bluetooth Keyboard"
+    ],
+    "digit_length": 10,
+    "require_enter": false
+  }
+}
