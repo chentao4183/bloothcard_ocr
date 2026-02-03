@@ -6,6 +6,14 @@ pyautogui==0.9.54
 pygetwindow==0.0.9
 pyperclip==1.9.0
 pytesseract==0.3.10
-
-
+numpy==1.23.5
+pynput==1.8.1
+# pyautogui的依赖
+mouseinfo>=0.1.3
+pymsgbox>=1.0.9
+pyscreeze>=0.1.28
+pytweening>=1.0.4
+# OCR相关依赖
+easyocr>=1.7.0
+paddleocr>=2.7.0.3
 

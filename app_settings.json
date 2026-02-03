@@ -35,7 +35,7 @@
         "height": 36
       },
       "sample_value": "100000000045",
-      "recognized_value": "100000000045",
+      "recognized_value": "10000045",
       "builtin": false
     },
     {
@@ -51,7 +51,7 @@
         "height": 35
       },
       "sample_value": "200000154",
-      "recognized_value": "200000154",
+      "recognized_value": "200000666",
       "builtin": false
     },
     {
@@ -115,7 +115,7 @@
         "height": 61
       },
       "sample_value": "诊疗医生姓名",
-      "recognized_value": "诊疗医生姓名",
+      "recognized_value": "诊疗医生",
       "builtin": false
     },
     {
@@ -131,7 +131,7 @@
         "height": 54
       },
       "sample_value": "辅助护士",
-      "recognized_value": "辅助护士",
+      "recognized_value": "8士",
       "builtin": false
     },
     {
@@ -147,7 +147,7 @@
         "height": 60
       },
       "sample_value": "检查台7",
-      "recognized_value": "检查台7",
+      "recognized_value": "检查8",
       "builtin": false
     },
     {
@@ -163,7 +163,7 @@
     }
   ],
   "service": {
-    "selected_version": "v1",
+    "selected_version": "v2",
     "versions": {
       "v1": {
         "verify_url": "http://10.10.5.116:62102/api/diagnosis/lk-application/getSingleApplicationDetail/",

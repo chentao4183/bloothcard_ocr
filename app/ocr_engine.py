@@ -10,6 +10,17 @@ import tempfile
 from pathlib import Path
 from typing import Optional, Dict, Any, Union
 import warnings
+import os
+import sys
+
+# PyInstaller 打包后资源查找逻辑
+def resource_path(relative_path):
+    """获取打包后资源的绝对路径"""
+    if hasattr(sys, '_MEIPASS'):
+        # 打包后运行时的路径
+        return os.path.join(sys._MEIPASS, relative_path)
+    # 开发时的路径
+    return os.path.join(os.path.abspath('.'), relative_path)
 
 # 尝试导入各种OCR库，按优先级排序
 OCR_ENGINES = {}
@@ -84,7 +95,22 @@ class PaddleOCREngine(BaseOCREngine):
     
     def __init__(self):
         try:
-            self.ocr = PaddleOCR(use_angle_cls=True, lang='ch', use_gpu=False, show_log=False)
+            # 配置PaddleOCR模型路径
+            paddle_model_dir = None
+            if hasattr(sys, '_MEIPASS'):
+                # 打包后使用内置的模型文件
+                paddle_model_dir = resource_path('paddleocr/ppocr/whl')
+                print(f"使用打包的PaddleOCR模型: {paddle_model_dir}")
+            
+            self.ocr = PaddleOCR(
+                use_angle_cls=True, 
+                lang='ch', 
+                use_gpu=False, 
+                show_log=False,
+                det_model_dir=os.path.join(paddle_model_dir, 'det') if paddle_model_dir else None,
+                rec_model_dir=os.path.join(paddle_model_dir, 'rec') if paddle_model_dir else None,
+                cls_model_dir=os.path.join(paddle_model_dir, 'cls') if paddle_model_dir else None
+            )
         except Exception as e:
             raise RuntimeError(f"PaddleOCR初始化失败: {e}")
     
@@ -165,7 +191,19 @@ class EasyOCREngine(BaseOCREngine):
     
     def __init__(self):
         try:
-            self.reader = easyocr.Reader(['ch_sim', 'en'], gpu=False)
+            # 配置EasyOCR模型路径
+            easyocr_model_dir = None
+            if hasattr(sys, '_MEIPASS'):
+                # 打包后使用内置的模型文件
+                easyocr_model_dir = resource_path('easyocr/model')
+                print(f"使用打包的EasyOCR模型: {easyocr_model_dir}")
+            
+            self.reader = easyocr.Reader(
+                ['ch_sim', 'en'], 
+                gpu=False,
+                model_storage_directory=easyocr_model_dir,
+                download_enabled=False  # 不下载模型，使用打包好的
+            )
         except Exception as e:
             raise RuntimeError(f"EasyOCR初始化失败: {e}")
     
@@ -321,7 +359,7 @@ class OCREngine:
                     continue
         
         if self.engine is None:
-            warnings.warn("没有可用的OCR引擎，将使用空引擎（所有识别返回空字符串）")
+            # 不显示警告，静默使用空引擎
             self.engine_name = "none"
     
     def recognize_from_image(self, image: PIL.Image.Image) -> str:

@@ -2,11 +2,11 @@
 
 
 a = Analysis(
-    ['app\\main.py'],
+    ['run_app.py'],
     pathex=[],
     binaries=[],
     datas=[],
-    hiddenimports=['winrt.windows.devices.bluetooth', 'winrt.windows.devices.enumeration', 'winrt.windows.devices.bluetooth.genericattributeprofile', 'winrt.windows.foundation', 'winrt.windows.storage.streams'],
+    hiddenimports=[],
     hookspath=[],
     hooksconfig={},
     runtime_hooks=[],

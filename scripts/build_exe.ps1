@@ -28,7 +28,7 @@ $hidden = @(
 $hiddenArgs = $hidden | ForEach-Object { "--hidden-import", $_ }
 
 $args = @(
-    "-F",                  # 单文件
+    "-D",                  # 单目录模式（更适合包含OCR模型等资源文件）
     "-w",                  # 无控制台窗口（GUI）
     "-n", $Name,
     "app/main.py"          # 直接以主程序作为入口，避免相对导入问题
